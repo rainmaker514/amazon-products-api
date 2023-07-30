@@ -1,3 +1,3 @@
-2023/07/14-15:06:52.285 2808 Reusing MANIFEST C:\Users\teriq\Documents\Projects\amazon-products-api\tmp\Default\shared_proto_db/MANIFEST-000001
-2023/07/14-15:06:52.286 2808 Recovering log #3
-2023/07/14-15:06:52.286 2808 Reusing old log C:\Users\teriq\Documents\Projects\amazon-products-api\tmp\Default\shared_proto_db/000003.log 
+2023/07/30-01:40:05.969 5758 Reusing MANIFEST C:\Users\teriq\Documents\Projects\amazon-products-api\tmp\Default\shared_proto_db/MANIFEST-000001
+2023/07/30-01:40:05.970 5758 Recovering log #3
+2023/07/30-01:40:05.971 5758 Reusing old log C:\Users\teriq\Documents\Projects\amazon-products-api\tmp\Default\shared_proto_db/000003.log 
