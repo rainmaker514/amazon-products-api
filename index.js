@@ -3,7 +3,7 @@ const fs = require('fs');
 
 (async () => {
     const browser = await puppeteer.launch({
-        headless: false,
+        //headless: false,
         //defaultViewport: false,
         userDataDir: "./tmp"
     });
@@ -14,7 +14,7 @@ const fs = require('fs');
         height: 800
     });
     
-    let items = [];
+    //let items = [];
     let isButtonDisabled = false;
     while(!isButtonDisabled){
         await autoScroll(page);
@@ -37,9 +37,9 @@ const fs = require('fs');
                 img = await page.evaluate(el => el.querySelector(".a-dynamic-image.p13n-sc-dynamic-image.p13n-product-image").getAttribute("src"), productHandle);
             } catch (error) {}
             
-            items.push({title, price, img});
+            //items.push({title, price, img});
 
-            fs.appendFile('results.csv', `${title},${price},${img}\n`, function(err){
+            fs.appendFile('results.csv', `${title.replace(/,/g, ".")},${price},${img}\n`, function(err){
             if(err) throw err;
     });
         }
@@ -52,8 +52,8 @@ const fs = require('fs');
         }
 }
     
-    console.log(items);    
-    console.log(items.length);    
+    // console.log(items);    
+    // console.log(items.length);    
     await browser.close();
 })();
 
