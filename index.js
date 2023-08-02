@@ -1,4 +1,5 @@
 const puppeteer = require('puppeteer');
+const fs = require('fs');
 
 (async () => {
     const browser = await puppeteer.launch({
@@ -13,18 +14,13 @@ const puppeteer = require('puppeteer');
         height: 800
     });
     
-    
     let items = [];
     let isButtonDisabled = false;
     while(!isButtonDisabled){
         await autoScroll(page);
-        // await page.evaluate(() => {
-        //     window.scrollTo(0, window.);
-        // })
-    const productHandles = await page.$$('.p13n-gridRow._cDEzb_grid-row_3Cywl > .a-column.a-span12.a-text-center._cDEzb_grid-column_2hIsc');
+        const productHandles = await page.$$('.p13n-gridRow._cDEzb_grid-row_3Cywl > .a-column.a-span12.a-text-center._cDEzb_grid-column_2hIsc');
         
-        
-    for(const productHandle of productHandles){ 
+        for(const productHandle of productHandles){ 
             let title = "null";
             let price = "null";
             let img = "null";
@@ -42,16 +38,20 @@ const puppeteer = require('puppeteer');
             } catch (error) {}
             
             items.push({title, price, img});
-            
-    }
-    //await page.waitForSelector(".a-last", {visible: true});
-            isButtonDisabled = await page.$(".a-disabled.a-last") !== null;
-            if(!isButtonDisabled){
-                await page.click(".a-last");
-                await new Promise(r => setTimeout(r, 2000));
-            }
-}
 
+            fs.appendFile('results.csv', `${title},${price},${img}\n`, function(err){
+            if(err) throw err;
+    });
+        }
+        
+        isButtonDisabled = await page.$(".a-disabled.a-last") !== null;
+        
+        if(!isButtonDisabled){
+            await page.click(".a-last");
+            await new Promise(r => setTimeout(r, 2000));
+        }
+}
+    
     console.log(items);    
     console.log(items.length);    
     await browser.close();
