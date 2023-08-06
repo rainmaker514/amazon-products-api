@@ -28,32 +28,47 @@ async function getAllProducts(link){
     });
 
     const page = await browser.newPage();
+    let isButtonDisabled = false;
+    let products = [];
+    
     await page.goto(link);
     await page.setViewport({width: 1200, height: 800});
-    await autoScroll(page);
-    const productHandles = await page.$$('.p13n-gridRow._cDEzb_grid-row_3Cywl > .a-column.a-span12.a-text-center._cDEzb_grid-column_2hIsc');
-    let products = [];
 
-    for(const productHandle of productHandles){ 
-        let title = "null";
-        let price = "null";
-        let link = "null";
+    while(!isButtonDisabled){ //checking if 'next' button is disabled, if it is, job is done
+        await autoScroll(page);
+        const productHandles = await page.$$('.p13n-gridRow._cDEzb_grid-row_3Cywl > .a-column.a-span12.a-text-center._cDEzb_grid-column_2hIsc');
 
-        try {
-            title = await page.evaluate(el => el.querySelector("span > div").textContent, productHandle);
-        } catch (error) {}
+        for(const productHandle of productHandles){ 
+            let title = "null";
+            let price = "null";
+            let link = "null";
+            const baseUrl = 'https://www.amazon.com';
 
-        try {
-            price = await page.evaluate(el => el.querySelector("span > span").textContent, productHandle);
-        } catch (error) {}
+            try {
+                title = await page.evaluate(el => el.querySelector("span > div").textContent, productHandle);
+            } catch (error) {}
+
+            try {
+                price = await page.evaluate(el => el.querySelector("span > span").textContent, productHandle);
+            } catch (error) {}
             
-        try {
-            link = await page.evaluate(el => el.querySelector(".a-link-normal").getAttribute("href"), productHandle);
-        } catch (error) {}
+            try {
+                link = await page.evaluate(el => el.querySelector(".a-link-normal").getAttribute("href"), productHandle);
+                link = baseUrl + link;
+            } catch (error) {}
         
-        products.push({title,price,link});
+            products.push({title,price,link});
+        }
+
+        //before while loop restarts, check for 'next' button disable, if not, click it and restart the loop
+        isButtonDisabled = await page.$(".a-disabled.a-last") !== null;
+        
+        if(!isButtonDisabled){
+            await page.click(".a-last");
+            await new Promise(r => setTimeout(r, 2000));
+        }
     }
-    // console.log('done');
+    console.log(products.length);
     await browser.close();
     return products;
 }
