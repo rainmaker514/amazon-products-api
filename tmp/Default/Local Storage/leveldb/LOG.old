@@ -1,3 +1,3 @@
-2023/08/07-21:26:33.093 34c0 Reusing MANIFEST C:\Users\teriq\Documents\Projects\amazon-products-api\tmp\Default\Local Storage\leveldb/MANIFEST-000001
-2023/08/07-21:26:33.095 34c0 Recovering log #30
-2023/08/07-21:26:33.104 34c0 Reusing old log C:\Users\teriq\Documents\Projects\amazon-products-api\tmp\Default\Local Storage\leveldb/000030.log 
+2023/08/07-21:34:49.586 475c Reusing MANIFEST C:\Users\teriq\Documents\Projects\amazon-products-api\tmp\Default\Local Storage\leveldb/MANIFEST-000001
+2023/08/07-21:34:49.587 475c Recovering log #30
+2023/08/07-21:34:49.592 475c Reusing old log C:\Users\teriq\Documents\Projects\amazon-products-api\tmp\Default\Local Storage\leveldb/000030.log 
