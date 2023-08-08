@@ -1,9 +1,9 @@
 const puppeteer = require('puppeteer');
 const fs = require('fs');
-const {Cluster} = require('puppeteer-cluster');
 
 (async () => {
     const browser = await puppeteer.launch({
+        headless: 'new',
         userDataDir: "./tmp"
     });
     const page = await browser.newPage();
@@ -14,6 +14,7 @@ const {Cluster} = require('puppeteer-cluster');
     });
     
     let isButtonDisabled = false;
+    let products = [];
     //creating csv
     fs.writeFile('results.csv', 'title,price,image', err => {
         if(err) throw err;
@@ -43,6 +44,8 @@ const {Cluster} = require('puppeteer-cluster');
             fs.appendFile('results.csv', `\n${title.replace(/,/g, ".")},${price},${img}`, err => {
                 if(err) throw err;
             });
+            products.push({title,price,img});
+            console.log(products);
         }
         
         //before while loop restarts, check for 'next' button disable, if not, click it and restart the loop
