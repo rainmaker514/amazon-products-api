@@ -86,7 +86,7 @@ app.get('/', (req, res) => {
     res.json('Welcome to my Amazon Web Scraping API!');
 });
 
-app.get('*', async(req, res) => {
+app.get('/all', async(req, res) => {
     try {//finds url in array based on request url params
         const url = urls.find((url) => url.name === req.url.replace('/', ''));
         let results = await getProducts(url.link);
