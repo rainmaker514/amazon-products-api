@@ -86,18 +86,14 @@ app.get('/', (req, res) => {
     res.json('Welcome to my Amazon Web Scraping API!');
 });
 
-// app.get('*', async(req, res) => {
-//     try {//finds url in array based on request url params
-//         const url = urls.find((url) => url.name === req.url.replace('/', ''));
-//         let results = await getProducts(url.link);
-//         res.json(results);
-//     } catch (error) {
-//         res.status(400).json('Invalid endpoint');
-//     }
-// });
-
-app.get('/all', (req, res) => {
-    res.json('works!');
+app.get('*', async(req, res) => {
+   // try {//finds url in array based on request url params
+        const url = urls.find((url) => url.name === req.url.replace('/', ''));
+        let results = await getProducts(url.link);
+        res.json(results);
+   // } catch (error) {
+     //   res.status(400).json('Invalid endpoint');
+    //}
 });
 
 async function getProducts(link){
