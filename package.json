@@ -17,6 +17,6 @@
     "puppeteer-cluster": "^0.23.0"
   },
   "engines": {
-  "node": ">=14 <15"
+  "node": ">=16.3.0"
   }
 }
