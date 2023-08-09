@@ -1,6 +1,7 @@
 const puppeteer = require('puppeteer');
 const express = require('express');
 const app = express();
+require('dotenv').config();
 const PORT = process.env.PORT || 8000;
 const urls = [
     {
@@ -101,6 +102,13 @@ async function getProducts(link){
         headless: 'new',
         defaultViewport: false,
         userDataDir: "./tmp",
+        args: [
+            '--disable-setuid-sandbox',
+            '--no-sandbox',
+            '--single-process',
+            '--no-zygote'
+        ],
+        executablePath: process.env.NODE_ENV === 'production' ? process.env.PUPPETEER_EXECUTABLE_PATH: puppeteer.executablePath()
     });
 
     const page = await browser.newPage();
