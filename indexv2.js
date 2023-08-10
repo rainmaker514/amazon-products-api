@@ -99,8 +99,8 @@ app.get('*', async(req, res) => {
 
 async function getProducts(link){
     const browser = await puppeteer.launch({
-        headless: 'new',
-        defaultViewport: false,
+        //headless: 'new',
+        //defaultViewport: false,
         userDataDir: "./tmp",
         args: [
             '--disable-setuid-sandbox',
