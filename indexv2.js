@@ -102,6 +102,7 @@ async function getProducts(link){
         headless: 'new',
         defaultViewport: false,
         userDataDir: "./tmp",
+        ignoreDefaultArgs: ['--disable-extensions'],
         args: [
             '--disable-setuid-sandbox',
             '--no-sandbox',
