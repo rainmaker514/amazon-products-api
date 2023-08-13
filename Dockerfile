@@ -18,11 +18,11 @@ COPY package*.json ./
 
 RUN npm ci
 
-RUN apt-get update
+USER root
 
-RUN apt-get install -y \
-    libX11-xcb1 \
-    libX11-xcb-dev \
+RUN apt-get update && apt-get install -y \
+    libx11-xcb1 \
+    libx11-xcb-dev \
     libxtst6 \
     libnss3 \
     libasound2 \
