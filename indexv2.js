@@ -166,7 +166,7 @@ async function getProducts(link){
         if (!isButtonDisabled) {
             
             await page.click("li.a-last");
-            await new Promise(r => setTimeout(r, 2000));
+            await new Promise(r => setTimeout(r, 10000));
         }
     }
     
