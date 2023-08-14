@@ -121,8 +121,8 @@ async function getProducts(link){
         //headless: false,
         defaultViewport: false,
         userDataDir: './tmp',
-        args:['--no-sandbox']
-        // executablePath: ''
+        args:['--no-sandbox'],
+        executablePath: process.env.NODE_ENV === 'production' ? process.env. PUPPETEER_EXECUTABLE_PATH : puppeteer.executablePath()
     });
 
     const page = await browser.newPage();
