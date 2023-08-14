@@ -122,6 +122,7 @@ async function getProducts(link){
         defaultViewport: false,
         userDataDir: './tmp',
         args:['--no-sandbox'],
+        //executablePath: '/usr/bin/google-chrome-stable'
         executablePath: process.env.NODE_ENV === 'production' ? process.env. PUPPETEER_EXECUTABLE_PATH : puppeteer.executablePath()
     });
 
