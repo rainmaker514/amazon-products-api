@@ -1,6 +1,6 @@
 FROM node:18
 
-ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome-stable
+ENV PUPPETEER_EXECUTABLE_PATH='/usr/bin/google-chrome-stable'
 
 WORKDIR /app
 
