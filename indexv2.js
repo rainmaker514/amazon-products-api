@@ -5,7 +5,7 @@ require('dotenv').config();
 const PORT = process.env.PORT || 8000;
 const urls = [
     {
-        name: 'all', 
+        name: 'all',
         link: 'https://www.amazon.com/Best-Sellers-Electronics/zgbs/electronics/ref=zg_bs_unv_electronics_1_10048700011_1'
     },
     {
@@ -87,43 +87,57 @@ app.get('/', (req, res) => {
     res.json('Welcome to my Amazon Web Scraping API!');
 });
 
-app.get('*', async(req, res) => {
-    //try {//finds url in array based on request url params
-        const url = urls.find((url) => url.name === req.url.replace('/', ''));
-        let results = await getProducts(url.link);
-        res.json(results);
-    //} catch (error) {
-      //  res.status(400).json('Invalid endpoint');
-    //}
+app.get('*', async (req, res, next) => {
+    //finds url in array based on request url params
+    const url = urls.find((url) => url.name === req.url.replace('/', ''));
+
+    if(url === undefined){//checks if url exists in array, if not create and pass an error to handler
+        const error = new Error('Invalid endpoint');
+        error.status = 400;
+        next(error);
+    }else{//if exists, call handler to handle valid endpoints 
+        next();
+    }
+});
+
+//valid endpoint handler
+app.get('*', async (req, res, next) => {
+    const url = urls.find((url) => url.name === req.url.replace('/', ''));
+    console.log('Getting products...');
+    const results = await getProducts(url.link);
+    console.log('Done!');
+    res.json(results);
+});
+
+//error handler
+app.use((err, req, res, next) => {
+    console.error(err.message);
+    res.status(err.status).json({error: err.message});
+    next();
 });
 
 async function getProducts(link){
-    const browser = await puppeteer.launch({
-        headless: 'new',
+    const browser = await puppeteer.launch({ 
+        //headless: false,
         defaultViewport: false,
-        userDataDir: "./tmp",
-        ignoreDefaultArgs: ['--disable-extensions'],
-        args: [
-            '--disable-setuid-sandbox',
-            '--no-sandbox',
-            '--single-process',
-            '--no-zygote'
-        ],
-        executablePath: process.env.NODE_ENV === "production" ? process.env.PUPPETEER_EXECUTABLE_PATH: puppeteer.executablePath()
+        userDataDir: './tmp',
+        args:['--no-sandbox']
+        // executablePath: ''
     });
 
     const page = await browser.newPage();
+    await page.setViewport({width: 1200, height:800});
+
     let isButtonDisabled = false;
     let products = [];
-
+    
     await page.goto(link);
-    await page.setViewport({width: 1200, height: 800});
 
-    while(!isButtonDisabled){ //checking if 'next' button is disabled, if it is, job is done
+    while (!isButtonDisabled) { //checking if 'next' button is disabled, if it is, job is done
         await autoScroll(page);
         const productHandles = await page.$$('.p13n-gridRow._cDEzb_grid-row_3Cywl > .a-column.a-span12.a-text-center._cDEzb_grid-column_2hIsc');
 
-        for(const productHandle of productHandles){ 
+        for (const productHandle of productHandles) {
             let title = "null";
             let price = "null";
             let link = "null";
@@ -131,34 +145,35 @@ async function getProducts(link){
 
             try {
                 title = await page.evaluate(el => el.querySelector("span > div").textContent, productHandle);
-            } catch (error) {}
+            } catch (error) { }
 
             try {
                 price = await page.evaluate(el => el.querySelector("span > span").textContent, productHandle);
-            } catch (error) {}
-            
+            } catch (error) { }
+
             try {
                 link = await page.evaluate(el => el.querySelector(".a-link-normal").getAttribute("href"), productHandle);
                 link = baseUrl + link;
-            } catch (error) {}
-        
-            products.push({title,price,link});
-        }
+            } catch (error) { }
 
+            products.push({ title, price, link });
+        }
+        //
         //before while loop restarts, check for 'next' button disable, if not, click it and restart the loop
-        isButtonDisabled = await page.$(".a-disabled.a-last") !== null;
-        
-        if(!isButtonDisabled){
-            await page.click(".a-last");
+        isButtonDisabled = await page.$("li.a-disabled.a-last") !== null;
+
+        if (!isButtonDisabled) {
+            
+            await page.click("li.a-last");
             await new Promise(r => setTimeout(r, 2000));
         }
     }
-
+    
     await browser.close();
     return products;
 }
 
-async function autoScroll(page){
+async function autoScroll(page) {
     await page.evaluate(async () => {
         await new Promise((resolve) => {
             var totalHeight = 0;
@@ -168,7 +183,7 @@ async function autoScroll(page){
                 window.scrollBy(0, distance);
                 totalHeight += distance;
 
-                if(totalHeight >= scrollHeight - window.innerHeight){
+                if (totalHeight >= scrollHeight - window.innerHeight) {
                     clearInterval(timer);
                     resolve();
                 }
@@ -176,3 +191,11 @@ async function autoScroll(page){
         });
     });
 }
+
+// (async () => {
+//     const browser = await puppeteer.launch({ headless: "new" });
+//     const page = await browser.newPage();
+//     await page.goto('https://www.google.com');
+//     await page.screenshot({ path: 'e.png' });
+//     await browser.close();
+// })();

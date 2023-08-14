@@ -1,3 +1,5 @@
-2023/08/09-14:43:47.010 109c Reusing MANIFEST C:\Users\teriq\Documents\Projects\amazon-products-api\tmp\Default\Session Storage/MANIFEST-000001
-2023/08/09-14:43:47.043 109c Recovering log #36
-2023/08/09-14:43:47.054 109c Reusing old log C:\Users\teriq\Documents\Projects\amazon-products-api\tmp\Default\Session Storage/000036.log 
+2023/08/14-13:52:10.786 19416 Reusing MANIFEST /home/yungicedtea/projects/amazon-products-api/tmp/Default/Session Storage/MANIFEST-000001
+2023/08/14-13:52:10.787 19416 Recovering log #36
+2023/08/14-13:52:10.787 19416 Reusing old log /home/yungicedtea/projects/amazon-products-api/tmp/Default/Session Storage/000036.log 
+2023/08/14-13:52:33.916 19416 Level-0 table #39: started
+2023/08/14-13:52:33.927 19416 Level-0 table #39: 19397 bytes OK
