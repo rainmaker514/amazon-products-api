@@ -121,7 +121,7 @@ async function getProducts(link){
         //headless: false,
         defaultViewport: false,
         userDataDir: './tmp',
-        args: ['--no-sandbox', '--user-agent=Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'],
+        args: ['--no-sandbox'],
         //executablePath: '/usr/bin/google-chrome-stable'
         executablePath: process.env.NODE_ENV === 'production' ? process.env. PUPPETEER_EXECUTABLE_PATH : puppeteer.executablePath()
     }); 
@@ -162,7 +162,7 @@ async function getProducts(link){
         //
         //before while loop restarts, check for 'next' button disable, if not, click it and restart the loop
         isButtonDisabled = await page.$("li.a-disabled.a-last") !== null;
-
+        console.log(isButtonDisabled);
         if (!isButtonDisabled) {
             
             await page.click("li.a-last");
