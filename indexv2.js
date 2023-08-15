@@ -124,7 +124,7 @@ async function getProducts(link){
         args: ['--no-sandbox', '--user-agent=Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'],
         //executablePath: '/usr/bin/google-chrome-stable'
         executablePath: process.env.NODE_ENV === 'production' ? process.env. PUPPETEER_EXECUTABLE_PATH : puppeteer.executablePath()
-    });
+    }); 
 
     const page = await browser.newPage();
     await page.setViewport({width: 1200, height:800});
