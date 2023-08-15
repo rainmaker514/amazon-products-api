@@ -118,7 +118,7 @@ app.use((err, req, res, next) => {
 
 async function getProducts(link){
     const browser = await puppeteer.launch({ 
-        headless: false,
+        //headless: false,
         defaultViewport: false,
         userDataDir: './tmp',
         args:['--no-sandbox'],
