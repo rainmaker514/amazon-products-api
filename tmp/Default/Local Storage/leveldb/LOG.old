@@ -1,3 +1,5 @@
-2023/08/14-13:50:25.653 1912c Reusing MANIFEST /home/yungicedtea/projects/amazon-products-api/tmp/Default/Local Storage/leveldb/MANIFEST-000001
-2023/08/14-13:50:25.654 1912c Recovering log #33
-2023/08/14-13:50:25.654 1912c Reusing old log /home/yungicedtea/projects/amazon-products-api/tmp/Default/Local Storage/leveldb/000033.log 
+2023/08/16-15:57:39.648 1caad Reusing MANIFEST /home/yungicedtea/projects/amazon-products-api/tmp/Default/Local Storage/leveldb/MANIFEST-000001
+2023/08/16-15:57:39.649 1caad Recovering log #47
+2023/08/16-15:57:39.654 1caad Level-0 table #51: started
+2023/08/16-15:57:39.671 1caad Level-0 table #51: 29490 bytes OK
+2023/08/16-15:57:39.746 1caad Delete type=0 #47

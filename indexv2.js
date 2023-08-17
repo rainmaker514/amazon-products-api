@@ -1,4 +1,5 @@
 const puppeteer = require('puppeteer');
+const cheerio = require('cheerio');
 const express = require('express');
 const app = express();
 require('dotenv').config();
@@ -104,9 +105,11 @@ app.get('*', async (req, res, next) => {
 app.get('*', async (req, res, next) => {
     const url = urls.find((url) => url.name === req.url.replace('/', ''));
     console.log('Getting products...');
-    const results = await getProducts(url.link);
+    //const results = await getProducts(url.link);
+    const htmlPages = await getHTML(url.link);
+    const results = getProducts(htmlPages);
     console.log('Done!');
-    res.json(results);
+    res.json(htmlPages);
 });
 
 //error handler
@@ -115,64 +118,141 @@ app.use((err, req, res, next) => {
     res.status(err.status).json({error: err.message});
     next();
 });
-
-async function getProducts(link){
-    const browser = await puppeteer.launch({ 
-        //headless: false,
+/*
+puppet launches
+goes to link
+grabs raw html
+add html page to array
+use cheerio to parse html
+enter while loop
+grab pagination, check if a-last is disabled
+if not grab link from it and make puppet go to that link and restart loop
+exit loop
+grab product data using for loop
+return
+*/
+async function getHTML(link){
+    const browser = await puppeteer.launch({
+        headless: false,
         defaultViewport: false,
         userDataDir: './tmp',
         args: ['--no-sandbox'],
         //executablePath: '/usr/bin/google-chrome-stable'
-        executablePath: process.env.NODE_ENV === 'production' ? process.env. PUPPETEER_EXECUTABLE_PATH : puppeteer.executablePath()
-    }); 
+        executablePath: process.env.NODE_ENV === 'production' ? process.env.PUPPETEER_EXECUTABLE_PATH : puppeteer.executablePath()
+    });
 
     const page = await browser.newPage();
-    await page.setViewport({width: 1200, height:800});
-
+    let htmlPages = [];
+    let baseUrl = 'https://www.amazon.com';
     let isButtonDisabled = false;
-    let products = [];
-    
+    let pageCounter = 0;
+
+    await page.setViewport({ width: 1200, height: 800 });
     await page.goto(link);
 
-    while (!isButtonDisabled) { //checking if 'next' button is disabled, if it is, job is done
+    while(!isButtonDisabled){
         await autoScroll(page);
-        const productHandles = await page.$$('.p13n-gridRow._cDEzb_grid-row_3Cywl > .a-column.a-span12.a-text-center._cDEzb_grid-column_2hIsc');
+        //grab raw html
+        const pageData = await page.evaluate(() => {
+            return {
+                html: document.documentElement.innerHTML
+            };
+        });
 
-        for (const productHandle of productHandles) {
-            let title = "null";
-            let price = "null";
-            let link = "null";
-            const baseUrl = 'https://www.amazon.com';
+        //putting pages in array for later
+        htmlPages.push(pageData);
 
-            try {
-                title = await page.evaluate(el => el.querySelector("span > div").textContent, productHandle);
-            } catch (error) { }
-
-            try {
-                price = await page.evaluate(el => el.querySelector("span > span").textContent, productHandle);
-            } catch (error) { }
-
-            try {
-                link = await page.evaluate(el => el.querySelector(".a-link-normal").getAttribute("href"), productHandle);
-                link = baseUrl + link;
-            } catch (error) { }
-
-            products.push({ title, price, link });
+        const $ = cheerio.load(htmlPages[pageCounter].html);
+        
+        //checking for disabled next button
+        const nextButton = $('.a-disabled.a-last');
+        
+        if (nextButton.text()){//if there is text on the button, meaning if the element with the above selectors exists, the button is disabled
+            isButtonDisabled = true;
+            continue;
         }
-        //
-        //before while loop restarts, check for 'next' button disable, if not, click it and restart the loop
-        isButtonDisabled = await page.$("li.a-disabled.a-last") !== null;
-        console.log(isButtonDisabled);
-        if (!isButtonDisabled) {
-            
-            await page.click('li.a-last');
-            await new Promise(r => setTimeout(r, 10000));
-        }
+        
+        let nextPage = baseUrl + $('.a-last').children('a').attr('href');
+        
+        pageCounter++;
+
+        await page.goto(nextPage);
     }
-    
+
     await browser.close();
-    return products;
+    
+    return htmlPages;
 }
+
+function getProducts(htmlPages){
+    let products = [];
+    let data;
+    for(let i = 0; i < htmlPages.length; i++){
+        const $ = cheerio.load(htmlPages[1].html);
+        
+        $()
+    }
+
+    return data;
+}
+
+// async function getProducts(link){
+//     const browser = await puppeteer.launch({ 
+//         //headless: false,
+//         defaultViewport: false,
+//         userDataDir: './tmp',
+//         args: ['--no-sandbox'],
+//         //executablePath: '/usr/bin/google-chrome-stable'
+//         executablePath: process.env.NODE_ENV === 'production' ? process.env. PUPPETEER_EXECUTABLE_PATH : puppeteer.executablePath()
+//     }); 
+
+//     const page = await browser.newPage();
+//     await page.setViewport({width: 1200, height:800});
+
+//     let isButtonDisabled = false;
+//     let products = [];
+    
+//     await page.goto(link);
+
+//     while (!isButtonDisabled) { //checking if 'next' button is disabled, if it is, job is done
+//         //await autoScroll(page);
+//         const productHandles = await page.$$('.p13n-gridRow._cDEzb_grid-row_3Cywl > .a-column.a-span12.a-text-center._cDEzb_grid-column_2hIsc');
+
+//         for (const productHandle of productHandles) {
+//             let title = "null";
+//             let price = "null";
+//             let link = "null";
+//             const baseUrl = 'https://www.amazon.com';
+
+//             try {
+//                 title = await page.evaluate(el => el.querySelector("span > div").textContent, productHandle);
+//             } catch (error) { }
+
+//             try {
+//                 price = await page.evaluate(el => el.querySelector("span > span").textContent, productHandle);
+//             } catch (error) { }
+
+//             try {
+//                 link = await page.evaluate(el => el.querySelector(".a-link-normal").getAttribute("href"), productHandle);
+//                 link = baseUrl + link;
+//             } catch (error) { }
+
+//             products.push({ title, price, link });
+//         }
+//         //
+//         //before while loop restarts, check for 'next' button disable, if not, click it and restart the loop
+//         isButtonDisabled = await page.$("li.a-disabled.a-last") !== null;
+//         console.log(isButtonDisabled);
+//         if (!isButtonDisabled) {
+            
+//             await page.click('li.a-last');
+//             await new Promise(r => setTimeout(r, 10000));
+//         }
+//     }
+    
+//     await browser.close();
+//     return products;
+// }
 
 async function autoScroll(page) {
     await page.evaluate(async () => {
@@ -192,11 +272,3 @@ async function autoScroll(page) {
         });
     });
 }
-
-// (async () => {
-//     const browser = await puppeteer.launch({ headless: "new" });
-//     const page = await browser.newPage();
-//     await page.goto('https://www.google.com');
-//     await page.screenshot({ path: 'e.png' });
-//     await browser.close();
-// })();
