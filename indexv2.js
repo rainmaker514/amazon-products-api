@@ -1,6 +1,7 @@
 const puppeteer = require('puppeteer');
 const cheerio = require('cheerio');
 const express = require('express');
+const { Console } = require('console');
 const app = express();
 require('dotenv').config();
 const PORT = process.env.PORT || 8000;
@@ -15,10 +16,10 @@ const urls = [
         link: 'https://www.amazon.com/Best-Sellers-Electronics-Electronics-Accessories-Supplies/zgbs/electronics/281407/ref=zg_bs_nav_electronics_1'
     },
     {
-        name: 'camera&photo',
+        name: 'camera&photo', 
         link: 'https://www.amazon.com/Best-Sellers-Electronics-Camera-Photo-Products/zgbs/electronics/502394/ref=zg_bs_nav_electronics_1'
     },
-    {
+    { 
         name: 'carelectronics',
         link: 'https://www.amazon.com/Best-Sellers-Electronics-Car-Electronics/zgbs/electronics/1077068/ref=zg_bs_nav_electronics_1'
     },
@@ -84,46 +85,74 @@ const urls = [
     }
 ];
 
+app.use(express.json());
+
 app.listen(PORT, () => console.log(`Server running on PORT ${PORT}`));
 app.get('/', (req, res) => {
     res.json('Welcome to my Amazon Web Scraping API!');
 });
 
-app.get('*', async (req, res, next) => {
-    //finds url in array based on request url params
-    const url = urls.find((url) => url.name === req.url.replace('/', ''));
-
-    if(url === undefined){//checks if url exists in array, if not create and pass an error to handler
-        const error = new Error('Invalid endpoint');
-        error.status = 400;
-        next(error);
-    }else{//if exists, call handler to handle valid endpoints 
+app.use('/:name', (req, res, next) => {
+    const url = urls.find((url) => url.name === req.params.name);
+    if (url) {
+        req.urlObject = url;
         next();
+    } else {
+        res.status(400).json({ error: 'Invalid endpoint' });
     }
 });
 
-//valid endpoint handler
-app.get('*', async (req, res, next) => {
-    const url = urls.find((url) => url.name === req.url.replace('/', ''));
-    console.log('Getting products...');
-    //const results = await getProducts(url.link);
+app.get('/:name', async (req, res) => {
+    const url = req.urlObject;
+    // Your scraping logic here using url.link
     const htmlPages = await getHTML(url.link);
     const results = getProducts(htmlPages);
     console.log('Done!');
     res.json(results);
 });
 
-//error handler
+// Error handler
 app.use((err, req, res, next) => {
-    console.error(err.message);
-    res.status(err.status).json({error: err.message});
-    next();
+    console.error(err.message); 
+    res.status(err.status || 500).json({ error: err.message });
 });
+
+// app.get('*', (req, res, next) => {
+//     //finds url in array based on request url params
+//     const url = urls.find((url) => url.name === req.url.replace('/', ''));
+
+//     if(url === undefined){//checks if url exists in array, if not create and pass an error to handler
+//         console.log(url);
+//         const error = new Error('Invalid endpoint');
+//         error.status = 400;
+//         next(error);
+//     }else{//if exists, call handler to handle valid endpoints 
+//         next(); 
+//     } 
+// });
+
+// //valid endpoint handler
+// app.get('*', async (req, res, next) => {
+//     const url = urls.find((url) => url.name === req.url.replace('/', ''));
+//     console.log('Getting products...');
+//     //const results = await getProducts(url.link);
+//     const htmlPages = await getHTML(url.link);
+//     const results = getProducts(htmlPages);
+//     console.log('Done!');
+//     res.json(results);
+// });
+
+// //error handler
+// app.use((err, req, res, next) => {
+//     console.error(err.message);
+//     res.status(err.status).json({error: err.message});
+//     next();
+// });
 
 //gets all html pages and puts them in array
 async function getHTML(link){
     const browser = await puppeteer.launch({
-        //headless: false,
+        headless: true,
         defaultViewport: false,
         userDataDir: './tmp',
         args: ['--no-sandbox'],
@@ -134,12 +163,14 @@ async function getHTML(link){
     const page = await browser.newPage();
     let htmlPages = [];
     let isButtonDisabled = false;
-    let pageCounter = 0;
+    let pageCounter = 1;
 
     await page.setViewport({ width: 1200, height: 800 });
     await page.goto(link);
-
+    
     while(!isButtonDisabled){
+        console.log('Scrolling page ' + pageCounter);
+        await new Promise(r => setTimeout(r, 2000));
         await autoScroll(page);
         //grab raw html
         const pageData = await page.evaluate(() => {
@@ -151,7 +182,7 @@ async function getHTML(link){
         //putting pages in array for later
         htmlPages.push(pageData);
 
-        const $ = cheerio.load(htmlPages[pageCounter].html);
+        const $ = cheerio.load(htmlPages[pageCounter-1].html);
         
         //checking for disabled next button
         const nextButton = $('.a-disabled.a-last');
@@ -167,7 +198,7 @@ async function getHTML(link){
 
         await page.goto(nextPage);
     }
-
+    console.log('Closing browser');
     await browser.close();
     
     return htmlPages;
@@ -189,12 +220,12 @@ function getProducts(htmlPages){
             reviews = $(element).find('.a-icon-row').children().attr('title');
             price = $(element).children().last().text();
             link = baseUrl + $(element).children().attr('href');
-            console.log(link);
+            
             products.push({title, reviews, price, link});
         });
     }
 
-    return products;
+    return products;  
 }
 
 // async function getProducts(link){
@@ -273,3 +304,4 @@ async function autoScroll(page) {
         });
     });
 }
+
