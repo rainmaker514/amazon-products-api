@@ -4,6 +4,7 @@ const express = require('express');
 const app = express();
 require('dotenv').config();
 const PORT = process.env.PORT || 8000;
+const baseUrl = 'https://www.amazon.com';
 const urls = [
     {
         name: 'all',
@@ -109,7 +110,7 @@ app.get('*', async (req, res, next) => {
     const htmlPages = await getHTML(url.link);
     const results = getProducts(htmlPages);
     console.log('Done!');
-    res.json(htmlPages);
+    res.json(results);
 });
 
 //error handler
@@ -118,22 +119,11 @@ app.use((err, req, res, next) => {
     res.status(err.status).json({error: err.message});
     next();
 });
-/*
-puppet launches
-goes to link
-grabs raw html
-add html page to array
-use cheerio to parse html
-enter while loop
-grab pagination, check if a-last is disabled
-if not grab link from it and make puppet go to that link and restart loop
-exit loop
-grab product data using for loop
-return
-*/
+
+//gets all html pages and puts them in array
 async function getHTML(link){
     const browser = await puppeteer.launch({
-        headless: false,
+        //headless: false,
         defaultViewport: false,
         userDataDir: './tmp',
         args: ['--no-sandbox'],
@@ -143,7 +133,6 @@ async function getHTML(link){
 
     const page = await browser.newPage();
     let htmlPages = [];
-    let baseUrl = 'https://www.amazon.com';
     let isButtonDisabled = false;
     let pageCounter = 0;
 
@@ -184,16 +173,28 @@ async function getHTML(link){
     return htmlPages;
 }
 
+
 function getProducts(htmlPages){
     let products = [];
-    let data;
+    let title = 'null';
+    let reviews = 'null';
+    let price ='null'
+    let link = 'null';
     for(let i = 0; i < htmlPages.length; i++){
-        const $ = cheerio.load(htmlPages[1].html);
+        const $ = cheerio.load(htmlPages[i].html);
         
-        $()
+        //for each element of this class, i want the title, link and price
+        $('.p13n-sc-uncoverable-faceout', htmlPages[i].html).each((i, element) => {
+            title = $(element).children('a').text();
+            reviews = $(element).find('.a-icon-row').children().attr('title');
+            price = $(element).children().last().text();
+            link = baseUrl + $(element).children().attr('href');
+            console.log(link);
+            products.push({title, reviews, price, link});
+        });
     }
 
-    return data;
+    return products;
 }
 
 // async function getProducts(link){
