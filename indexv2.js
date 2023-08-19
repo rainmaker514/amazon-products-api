@@ -137,7 +137,7 @@ async function getHTML(link){
 
     await page.setViewport({ width: 1200, height: 800 });
     await page.goto(link);
-    
+    console.log(link);
     while(!isButtonDisabled){
         console.log('Scrolling page ' + pageCounter);
         await new Promise(r => setTimeout(r, 2000));
