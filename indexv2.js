@@ -107,7 +107,7 @@ app.get('/:name', async (req, res) => {
     const url = req.urlObject;
     console.log('Getting pages');
     const htmlPages = await getHTML(url.link);
-    console.log('Getting pages');
+    console.log('Getting products');
     const results = getProducts(htmlPages);
     console.log('Done!');
     res.json(results);
@@ -139,7 +139,6 @@ async function getHTML(link){
     await page.goto(link);
     
     while(!isButtonDisabled){
-        console.log(link);
         console.log('Scrolling page ' + pageCounter);
         await new Promise(r => setTimeout(r, 2000));
         await autoScroll(page);
@@ -164,6 +163,7 @@ async function getHTML(link){
         }
         
         let nextPage = baseUrl + $('.a-last').children('a').attr('href');
+        console.log(nextPage);
         
         pageCounter++;
 
