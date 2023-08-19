@@ -139,7 +139,6 @@ async function getHTML(link){
     await page.goto(link);
     
     while(!isButtonDisabled){
-        console.log(link);
         console.log('Scrolling page ' + pageCounter);
         await new Promise(r => setTimeout(r, 2000));
         await autoScroll(page);
@@ -159,6 +158,7 @@ async function getHTML(link){
         const nextButton = $('.a-disabled.a-last');
         
         if (nextButton.text()){//if there is text on the button, meaning if the element with the above selectors exists, the button is disabled
+            console.log('link');
             isButtonDisabled = true;
             continue;
         }
