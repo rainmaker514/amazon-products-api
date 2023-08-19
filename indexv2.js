@@ -105,8 +105,9 @@ app.use('/:name', (req, res, next) => {
 
 app.get('/:name', async (req, res) => {
     const url = req.urlObject;
-    // Your scraping logic here using url.link
+    console.log('Getting pages');
     const htmlPages = await getHTML(url.link);
+    console.log('Getting pages');
     const results = getProducts(htmlPages);
     console.log('Done!');
     res.json(results);
@@ -138,6 +139,7 @@ async function getHTML(link){
     await page.goto(link);
     
     while(!isButtonDisabled){
+        console.log(link);
         console.log('Scrolling page ' + pageCounter);
         await new Promise(r => setTimeout(r, 2000));
         await autoScroll(page);
@@ -169,7 +171,7 @@ async function getHTML(link){
     }
 
     console.log('Closing browser');
-    
+
     await browser.close();
     await cleanUp();
 
