@@ -1,5 +1,0 @@
-[0807/212413.759:WARNING:backend_impl.cc(1816)] Destroying invalid entry.
-[0807/212414.673:INFO:CONSOLE(32)] "Uncaught (in promise) TypeError: b.cardModuleFactory is not a function", source: https://m.media-amazon.com/images/I/51AcmceL-rL.js?AUIClients/CardJsRuntimeBuzzCopyBuild (32)
-[0807/212414.673:INFO:CONSOLE(32)] "Uncaught (in promise) TypeError: b.cardModuleFactory is not a function", source: https://m.media-amazon.com/images/I/51AcmceL-rL.js?AUIClients/CardJsRuntimeBuzzCopyBuild (32)
-[0807/212428.123:INFO:CONSOLE(32)] "Uncaught (in promise) TypeError: b.cardModuleFactory is not a function", source: https://m.media-amazon.com/images/I/51AcmceL-rL.js?AUIClients/CardJsRuntimeBuzzCopyBuild (32)
-[0807/212428.123:INFO:CONSOLE(32)] "Uncaught (in promise) TypeError: b.cardModuleFactory is not a function", source: https://m.media-amazon.com/images/I/51AcmceL-rL.js?AUIClients/CardJsRuntimeBuzzCopyBuild (32)

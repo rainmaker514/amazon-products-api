@@ -4,6 +4,7 @@ const express = require('express');
 const { Console } = require('console');
 const app = express();
 require('dotenv').config();
+const fs = require('fs').promises;
 const PORT = process.env.PORT || 8000;
 const baseUrl = 'https://www.amazon.com';
 const urls = [
@@ -117,38 +118,6 @@ app.use((err, req, res, next) => {
     res.status(err.status || 500).json({ error: err.message });
 });
 
-// app.get('*', (req, res, next) => {
-//     //finds url in array based on request url params
-//     const url = urls.find((url) => url.name === req.url.replace('/', ''));
-
-//     if(url === undefined){//checks if url exists in array, if not create and pass an error to handler
-//         console.log(url);
-//         const error = new Error('Invalid endpoint');
-//         error.status = 400;
-//         next(error);
-//     }else{//if exists, call handler to handle valid endpoints 
-//         next(); 
-//     } 
-// });
-
-// //valid endpoint handler
-// app.get('*', async (req, res, next) => {
-//     const url = urls.find((url) => url.name === req.url.replace('/', ''));
-//     console.log('Getting products...');
-//     //const results = await getProducts(url.link);
-//     const htmlPages = await getHTML(url.link);
-//     const results = getProducts(htmlPages);
-//     console.log('Done!');
-//     res.json(results);
-// });
-
-// //error handler
-// app.use((err, req, res, next) => {
-//     console.error(err.message);
-//     res.status(err.status).json({error: err.message});
-//     next();
-// });
-
 //gets all html pages and puts them in array
 async function getHTML(link){
     const browser = await puppeteer.launch({
@@ -198,12 +167,14 @@ async function getHTML(link){
 
         await page.goto(nextPage);
     }
+
     console.log('Closing browser');
-    await browser.close();
     
+    await browser.close();
+    await cleanUp();
+
     return htmlPages;
 }
-
 
 function getProducts(htmlPages){
     let products = [];
@@ -228,64 +199,6 @@ function getProducts(htmlPages){
     return products;  
 }
 
-// async function getProducts(link){
-//     const browser = await puppeteer.launch({ 
-//         //headless: false,
-//         defaultViewport: false,
-//         userDataDir: './tmp',
-//         args: ['--no-sandbox'],
-//         //executablePath: '/usr/bin/google-chrome-stable'
-//         executablePath: process.env.NODE_ENV === 'production' ? process.env. PUPPETEER_EXECUTABLE_PATH : puppeteer.executablePath()
-//     }); 
-
-//     const page = await browser.newPage();
-//     await page.setViewport({width: 1200, height:800});
-
-//     let isButtonDisabled = false;
-//     let products = [];
-    
-//     await page.goto(link);
-
-//     while (!isButtonDisabled) { //checking if 'next' button is disabled, if it is, job is done
-//         //await autoScroll(page);
-//         const productHandles = await page.$$('.p13n-gridRow._cDEzb_grid-row_3Cywl > .a-column.a-span12.a-text-center._cDEzb_grid-column_2hIsc');
-
-//         for (const productHandle of productHandles) {
-//             let title = "null";
-//             let price = "null";
-//             let link = "null";
-//             const baseUrl = 'https://www.amazon.com';
-
-//             try {
-//                 title = await page.evaluate(el => el.querySelector("span > div").textContent, productHandle);
-//             } catch (error) { }
-
-//             try {
-//                 price = await page.evaluate(el => el.querySelector("span > span").textContent, productHandle);
-//             } catch (error) { }
-
-//             try {
-//                 link = await page.evaluate(el => el.querySelector(".a-link-normal").getAttribute("href"), productHandle);
-//                 link = baseUrl + link;
-//             } catch (error) { }
-
-//             products.push({ title, price, link });
-//         }
-//         //
-//         //before while loop restarts, check for 'next' button disable, if not, click it and restart the loop
-//         isButtonDisabled = await page.$("li.a-disabled.a-last") !== null;
-//         console.log(isButtonDisabled);
-//         if (!isButtonDisabled) {
-            
-//             await page.click('li.a-last');
-//             await new Promise(r => setTimeout(r, 10000));
-//         }
-//     }
-    
-//     await browser.close();
-//     return products;
-// }
-
 async function autoScroll(page) {
     await page.evaluate(async () => {
         await new Promise((resolve) => {
@@ -303,5 +216,15 @@ async function autoScroll(page) {
             }, 100);
         });
     });
+}
+
+async function cleanUp() {
+    try {
+        // Remove the tmp folder
+        await fs.rm('./tmp', { recursive: true });
+        console.log('Temporary files and data cleaned up.');
+    } catch (error) {
+        console.error('Error cleaning up:', error);
+    }
 }
 
