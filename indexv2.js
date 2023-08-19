@@ -162,16 +162,9 @@ async function getHTML(link){
             isButtonDisabled = true;
             continue;
         }
-
-        const nextButtonElement = $('.a-last');
-        if (nextButtonElement) {
-            // .a-last element exists, proceed with extracting the href attribute
-        } else {
-            console.log('.a-last element not found');
-        }
         
         let nextPage = baseUrl + $('.a-last').children('a').attr('href');
-        console.log(link);
+        console.log(nextPage);
         
         pageCounter++;
 
