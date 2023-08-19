@@ -137,8 +137,9 @@ async function getHTML(link){
 
     await page.setViewport({ width: 1200, height: 800 });
     await page.goto(link);
-    console.log(link);
+    
     while(!isButtonDisabled){
+        console.log(link);
         console.log('Scrolling page ' + pageCounter);
         await new Promise(r => setTimeout(r, 2000));
         await autoScroll(page);
@@ -170,6 +171,7 @@ async function getHTML(link){
         }
         
         let nextPage = baseUrl + $('.a-last').children('a').attr('href');
+        console.log(link);
         
         pageCounter++;
 
