@@ -163,7 +163,7 @@ async function getHTML(link){
             continue;
         }
         
-        let nextPage = baseUrl + $('.a-last').children('a').attr('href');
+        let nextPage = baseUrl + $('li.a-last').children('a').attr('href');
         console.log(nextPage);
         
         pageCounter++;
