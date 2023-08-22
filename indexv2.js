@@ -108,9 +108,9 @@ app.get('/:name', async (req, res) => {
     console.log('Getting pages');
     const htmlPages = await getHTML(url.link);
     console.log('Getting products');
-    const results = getProducts(htmlPages);
+    //const results = getProducts(htmlPages);
     console.log('Done!');
-    res.json(results);
+    res.json(htmlPages);
 });
 
 // Error handler
@@ -138,7 +138,7 @@ async function getHTML(link){
     await page.setViewport({ width: 1200, height: 800 });
     await page.goto(link);
     
-    while(!isButtonDisabled){
+   // while(!isButtonDisabled){
         console.log('Scrolling page ' + pageCounter);
         await new Promise(r => setTimeout(r, 5000));
         await autoScroll(page);
@@ -161,7 +161,7 @@ async function getHTML(link){
         if (nextButton.text()){//if there is text on the button, meaning if the element with the above selectors exists, the button is disabled
             console.log('link');
             isButtonDisabled = true;
-            continue;
+            //continue;
         }
         
         let nextPage = baseUrl + $('.a-last').children('a').attr('href');
@@ -169,8 +169,8 @@ async function getHTML(link){
         
         pageCounter++;
 
-        await page.goto(nextPage);
-    }
+        //await page.goto(nextPage);
+    //}
 
     console.log('Closing browser');
 
