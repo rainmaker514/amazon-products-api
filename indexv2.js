@@ -140,7 +140,7 @@ async function getHTML(link){
     
     while(!isButtonDisabled){
         console.log('Scrolling page ' + pageCounter);
-        await new Promise(r => setTimeout(r, 2000));
+        await new Promise(r => setTimeout(r, 5000));
         await autoScroll(page);
         //grab raw html
         const pageData = await page.evaluate(() => {
