@@ -149,7 +149,7 @@ async function getHTML(link){
                 html: document.documentElement.innerHTML
             };
         });
-
+        await new Promise(r => setTimeout(r, 5000));
         //putting pages in array for later
         htmlPages.push(pageData);
 
@@ -168,7 +168,7 @@ async function getHTML(link){
         //console.log(nextButton.text());
         
         pageCounter++;
-
+        await new Promise(r => setTimeout(r, 5000));
         await page.goto(nextPage);
     }
 
