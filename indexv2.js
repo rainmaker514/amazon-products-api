@@ -138,7 +138,7 @@ app.use((err, req, res, next) => {
 async function getHTML(link){
     puppeteer.use(StealthPLugin());
     const browser = await puppeteer.launch({
-        headless: true,
+        headless: false,
         defaultViewport: false,
         userDataDir: './tmp',
         args: ['--no-sandbox'],
