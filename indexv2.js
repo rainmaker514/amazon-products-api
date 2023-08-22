@@ -153,7 +153,7 @@ async function getHTML(link){
         htmlPages.push(pageData);
 
         const $ = cheerio.load(htmlPages[pageCounter-1].html);
-        //console.log(htmlPages[pageCounter - 1].html);
+        console.log(htmlPages[pageCounter - 1].html);
         
         //checking for disabled next button
         const nextButton = $('.a-disabled.a-last');
