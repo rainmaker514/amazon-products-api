@@ -1,4 +1,5 @@
-const puppeteer = require('puppeteer');
+const puppeteer = require('puppeteer-extra');
+const StealthPLugin = require('puppeteer-extra-plugin-stealth');
 const cheerio = require('cheerio');
 const express = require('express');
 const { Console } = require('console');
@@ -90,6 +91,7 @@ app.use(express.json());
 
 app.listen(PORT, () => console.log(`Server running on PORT ${PORT}`));
 app.get('/', (req, res) => {
+    //test();
     res.json('Welcome to my Amazon Web Scraping API!');
 });
 
@@ -119,8 +121,22 @@ app.use((err, req, res, next) => {
     res.status(err.status || 500).json({ error: err.message });
 });
 
+// function test(){
+    
+//     puppeteer.launch({ headless: true }).then(async browser => {
+//         console.log('Running tests..')
+//         const page = await browser.newPage()
+//         await page.goto('https://bot.sannysoft.com')
+//         await page.waitForTimeout(5000)
+//         await page.screenshot({ path: 'testresult.png', fullPage: true })
+//         await browser.close()
+//         console.log(`All done, check the screenshot. ✨`)
+//     })
+// }
+
 //gets all html pages and puts them in array
 async function getHTML(link){
+    puppeteer.use(StealthPLugin());
     const browser = await puppeteer.launch({
         headless: true,
         defaultViewport: false,
@@ -131,7 +147,6 @@ async function getHTML(link){
     });
 
     const page = await browser.newPage();
-    await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/93.0.4577.82 Safari/537.36');
     let htmlPages = [];
     let isButtonDisabled = false;
     let pageCounter = 1;
