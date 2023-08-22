@@ -153,19 +153,18 @@ async function getHTML(link){
         htmlPages.push(pageData);
 
         const $ = cheerio.load(htmlPages[pageCounter-1].html);
-        console.log(htmlPages[pageCounter - 1].html);
+        //console.log(htmlPages[pageCounter - 1].html);
         
         //checking for disabled next button
         const nextButton = $('.a-disabled.a-last');
         
         if (nextButton.text()){//if there is text on the button, meaning if the element with the above selectors exists, the button is disabled
-            console.log('link');
             isButtonDisabled = true;
             continue;
         }
         console.log($('.a-last').children('a').attr('href'));
         let nextPage = baseUrl + $('.a-last').children('a').attr('href');
-        console.log(nextButton.text());
+        //console.log(nextButton.text());
         
         pageCounter++;
 
