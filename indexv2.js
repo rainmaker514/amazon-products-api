@@ -1,8 +1,6 @@
 const puppeteer = require('puppeteer-extra');
-const StealthPLugin = require('puppeteer-extra-plugin-stealth');
 const cheerio = require('cheerio');
 const express = require('express');
-const { Console } = require('console');
 const app = express();
 require('dotenv').config();
 const fs = require('fs').promises;
@@ -87,11 +85,16 @@ const urls = [
     }
 ];
 
+const proxies = [
+    '34.69.233.166:80',
+    '47.88.62.42:80',
+    '20.120.240.49:80'
+];
+
 app.use(express.json());
 
 app.listen(PORT, () => console.log(`Server running on PORT ${PORT}`));
 app.get('/', (req, res) => {
-    //test();
     res.json('Welcome to my Amazon Web Scraping API!');
 });
 
@@ -121,72 +124,64 @@ app.use((err, req, res, next) => {
     res.status(err.status || 500).json({ error: err.message });
 });
 
-// function test(){
-    
-//     puppeteer.launch({ headless: true }).then(async browser => {
-//         console.log('Running tests..')
-//         const page = await browser.newPage()
-//         await page.goto('https://bot.sannysoft.com')
-//         await page.waitForTimeout(5000)
-//         await page.screenshot({ path: 'testresult.png', fullPage: true })
-//         await browser.close()
-//         console.log(`All done, check the screenshot. ✨`)
-//     })
-// }
-
 //gets all html pages and puts them in array
 async function getHTML(link){
-    puppeteer.use(StealthPLugin());
-    const browser = await puppeteer.launch({
-        headless: true,
-        defaultViewport: false,
-        userDataDir: './tmp',
-        args: ['--no-sandbox'],
-        //executablePath: '/usr/bin/google-chrome-stable'
-        executablePath: process.env.NODE_ENV === 'production' ? process.env.PUPPETEER_EXECUTABLE_PATH : puppeteer.executablePath()
-    });
-
-    const page = await browser.newPage();
-    let htmlPages = [];
-    let isButtonDisabled = false;
-    let pageCounter = 1;
-
-    await page.setViewport({ width: 1200, height: 800 });
-    await page.goto(link);
-    
-    while(!isButtonDisabled){
-        console.log('Scrolling page ' + pageCounter);
-        await new Promise(r => setTimeout(r, 5000));
-        await autoScroll(page);
-        //grab raw html
-        const pageData = await page.evaluate(() => {
-            return {
-                html: document.documentElement.innerHTML
-            };
+    proxyLoop: for(const proxy of proxies){
+        const browser = await puppeteer.launch({
+            headless: true,
+            defaultViewport: false,
+            userDataDir: './tmp',
+            args: ['--no-sandbox', `--proxy-server=${proxy}`],
+            //executablePath: '/usr/bin/google-chrome-stable'
+            executablePath: process.env.NODE_ENV === 'production' ? process.env.PUPPETEER_EXECUTABLE_PATH : puppeteer.executablePath()
         });
-        await new Promise(r => setTimeout(r, 5000));
-        //putting pages in array for later
-        htmlPages.push(pageData);
 
-        const $ = cheerio.load(htmlPages[pageCounter-1].html);
-        //console.log(htmlPages[pageCounter - 1].html);
-        
-        //checking for disabled next button
-        const nextButton = $('.a-disabled.a-last');
-        
-        if (nextButton.text()){//if there is text on the button, meaning if the element with the above selectors exists, the button is disabled
-            isButtonDisabled = true;
-            continue;
+        const page = await browser.newPage();
+        let htmlPages = [];
+        let isButtonDisabled = false;
+        let pageCounter = 1;
+
+        await page.setViewport({ width: 1200, height: 800 });
+        await page.goto(link);
+
+        while (!isButtonDisabled) {
+            console.log('Scrolling page ' + pageCounter);
+            await new Promise(r => setTimeout(r, 5000));
+            await autoScroll(page);
+            //grab raw html
+            const pageData = await page.evaluate(() => {
+                return {
+                    html: document.documentElement.innerHTML
+                };
+            });
+            await new Promise(r => setTimeout(r, 5000));
+            //putting pages in array for later
+            htmlPages.push(pageData);
+
+            const $ = cheerio.load(htmlPages[pageCounter - 1].html);
+            //console.log(htmlPages[pageCounter - 1].html);
+
+            //checking for disabled next button
+            const nextButton = $('.a-disabled.a-last');
+
+            if (nextButton.text()) {//if there is text on the button, meaning if the element with the above selectors exists, the button is disabled
+                isButtonDisabled = true;
+                continue;
+            }
+
+            let nextPage = baseUrl + $('.a-last').children('a').attr('href');
+
+            pageCounter++;
+            await new Promise(r => setTimeout(r, 5000));
+
+            try {
+                await page.goto(nextPage);
+            } catch (error) {
+                continue proxyLoop;
+            }
         }
-        console.log($('.a-last').children('a').attr('href'));
-        let nextPage = baseUrl + $('.a-last').children('a').attr('href');
-        //console.log(nextButton.text());
-        
-        pageCounter++;
-        await new Promise(r => setTimeout(r, 5000));
-        await page.goto(nextPage);
+        break;        
     }
-
     console.log('Closing browser');
 
     await browser.close();
