@@ -1,4 +1,4 @@
-const puppeteer = require('puppeteer-extra');
+const puppeteer = require('puppeteer');
 const cheerio = require('cheerio');
 const express = require('express');
 const app = express();
