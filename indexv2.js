@@ -85,12 +85,6 @@ const urls = [
     }
 ];
 
-const proxies = [
-    '34.69.233.166:80',
-    '47.88.62.42:80',
-    '20.120.240.49:80'
-];
-
 app.use(express.json());
 
 app.listen(PORT, () => console.log(`Server running on PORT ${PORT}`));
@@ -126,63 +120,58 @@ app.use((err, req, res, next) => {
 
 //gets all html pages and puts them in array
 async function getHTML(link){
-    proxyLoop: for(const proxy of proxies){
-        const browser = await puppeteer.launch({
-            headless: true,
-            defaultViewport: false,
-            userDataDir: './tmp',
-            args: ['--no-sandbox', `--proxy-server=${proxy}`],
-            //executablePath: '/usr/bin/google-chrome-stable'
-            executablePath: process.env.NODE_ENV === 'production' ? process.env.PUPPETEER_EXECUTABLE_PATH : puppeteer.executablePath()
+    const browser = await puppeteer.launch({
+        headless: false,
+        defaultViewport: false,
+        userDataDir: './tmp',
+        args: ['--no-sandbox'],
+        executablePath: process.env.NODE_ENV === 'production' ? process.env.PUPPETEER_EXECUTABLE_PATH : puppeteer.executablePath()
+    });
+
+    const page = await browser.newPage();
+    let htmlPages = [];
+    let isButtonDisabled = false;
+    let pageCounter = 1;
+
+    await page.setViewport({ width: 1200, height: 800 });
+    await page.goto(link);
+    
+    while(!isButtonDisabled){
+        console.log('Scrolling page ' + pageCounter);
+        
+        await autoScroll(page);
+        //grab raw html  
+        const pageData = await page.evaluate(() => {
+            return {
+                html: document.documentElement.innerHTML
+            };
         });
+        await new Promise(r => setTimeout(r, 2000));
+        //putting pages in array for later
+        htmlPages.push(pageData);
 
-        const page = await browser.newPage();
-        let htmlPages = [];
-        let isButtonDisabled = false;
-        let pageCounter = 1;
-
-        await page.setViewport({ width: 1200, height: 800 });
-        await page.goto(link);
-
-        while (!isButtonDisabled) {
-            console.log('Scrolling page ' + pageCounter);
-            await new Promise(r => setTimeout(r, 5000));
-            await autoScroll(page);
-            //grab raw html
-            const pageData = await page.evaluate(() => {
-                return {
-                    html: document.documentElement.innerHTML
-                };
-            });
-            await new Promise(r => setTimeout(r, 5000));
-            //putting pages in array for later
-            htmlPages.push(pageData);
-
-            const $ = cheerio.load(htmlPages[pageCounter - 1].html);
-            //console.log(htmlPages[pageCounter - 1].html);
-
-            //checking for disabled next button
-            const nextButton = $('.a-disabled.a-last');
-
-            if (nextButton.text()) {//if there is text on the button, meaning if the element with the above selectors exists, the button is disabled
-                isButtonDisabled = true;
-                continue;
-            }
-
-            let nextPage = baseUrl + $('.a-last').children('a').attr('href');
-
-            pageCounter++;
-            await new Promise(r => setTimeout(r, 5000));
-
-            try {
-                await page.goto(nextPage);
-            } catch (error) {
-                continue proxyLoop;
-            }
+        const $ = cheerio.load(htmlPages[pageCounter-1].html);
+        
+        //checking for disabled next button
+        const nextButton = $('.a-disabled.a-last');
+        
+        if (nextButton.text()){//if there is text on the button, meaning if the element with the above selectors exists, the button is disabled
+            isButtonDisabled = true;
+            continue;
         }
-        break;        
+        
+        let nextPage = baseUrl + $('.a-last').children('a').attr('href');
+        
+        pageCounter++;
+        
+        try {
+            await page.goto(nextPage);
+        } catch (error) {
+            console.log('Reloading page');
+            await page.reload();
+            pageCounter--;
+        }
     }
-    console.log('Closing browser');
 
     await browser.close();
     await cleanUp();
@@ -238,7 +227,7 @@ async function cleanUp() {
         await fs.rm('./tmp', { recursive: true });
         console.log('Temporary files and data cleaned up.');
     } catch (error) {
-        console.error('Error cleaning up:', error);
+        console.error('Error cleaning up:', error); 
     }
 }
 
