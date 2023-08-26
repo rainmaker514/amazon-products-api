@@ -121,7 +121,7 @@ app.use((err, req, res, next) => {
 //gets all html pages and puts them in array
 async function getHTML(link){
     const browser = await puppeteer.launch({
-        headless: false,
+        headless: true,
         defaultViewport: false,
         userDataDir: './tmp',
         args: ['--no-sandbox'],
