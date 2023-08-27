@@ -163,15 +163,20 @@ async function getHTML(link){
         
         let nextPage = baseUrl + $('.a-last').children('a').attr('href');
         
+        if(nextPage.contains('undefined')){
+            await page.reload();
+            continue;
+        }
+        
         pageCounter++;
         
-        try {
-            await page.goto(nextPage);
-        } catch (error) {
-            console.log('Reloading page');
-            await page.goto(link);
-            pageCounter--;
-        }
+        // try {
+        //     await page.goto(nextPage);
+        // } catch (error) {
+        //     console.log('Reloading page');
+        //     await page.goto(currentPage);
+        //     pageCounter--;
+        // }
     }
 
     await browser.close();
