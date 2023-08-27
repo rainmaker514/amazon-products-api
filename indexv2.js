@@ -161,13 +161,15 @@ async function getHTML(link){
             continue;
         }
         
-        let nextPage = baseUrl + $('.a-last').children('a').attr('href');
+        let nextPage = $('.a-last').children('a').attr('href');
         
-        if(nextPage ==='undefined'){
+        if(nextPage === 'undefined'){
             await page.reload();
             continue;
         }
         
+        nextPage = baseUrl + nextPage;
+
         pageCounter++;
         
         //try {
