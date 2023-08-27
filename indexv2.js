@@ -132,6 +132,7 @@ async function getHTML(link){
     let htmlPages = [];
     let isButtonDisabled = false;
     let pageCounter = 1;
+    let currentPage = link;
 
     await page.setViewport({ width: 1200, height: 800 });
     await page.goto(link);
@@ -168,7 +169,7 @@ async function getHTML(link){
             await page.goto(nextPage);
         } catch (error) {
             console.log('Reloading page');
-            await page.reload();
+            await page.goto(link);
             pageCounter--;
         }
     }
