@@ -163,7 +163,7 @@ async function getHTML(link){
         
         let nextPage = baseUrl + $('.a-last').children('a').attr('href');
         
-        if(nextPage.contains('undefined')){
+        if(nextPage ==='undefined'){
             await page.reload();
             continue;
         }
