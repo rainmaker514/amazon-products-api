@@ -170,13 +170,13 @@ async function getHTML(link){
         
         pageCounter++;
         
-        // try {
-        //     await page.goto(nextPage);
-        // } catch (error) {
-        //     console.log('Reloading page');
-        //     await page.goto(currentPage);
-        //     pageCounter--;
-        // }
+        //try {
+            await page.goto(nextPage);
+        //} catch (error) {
+          //  console.log('Reloading page');
+            //await page.goto(currentPage);
+            //pageCounter--;
+        //}
     }
 
     await browser.close();
