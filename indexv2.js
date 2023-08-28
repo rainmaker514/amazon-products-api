@@ -164,7 +164,7 @@ async function getHTML(link){
         let nextPage = $('.a-last').children('a').attr('href');
         
         if(nextPage === undefined){
-            await page.reload();
+            await page.goto(link);
             continue;
         }
         
