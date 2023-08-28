@@ -162,14 +162,14 @@ async function getHTML(link){
         }
         
         let nextPage = $('.a-last').children('a').attr('href');
-        console.log(typeof(nextPage));
+        
         if(nextPage === 'undefined'){
             await page.reload();
             continue;
         }
         
         nextPage = baseUrl + nextPage;
-
+        console.log(typeof (nextPage));
         pageCounter++;
         
         //try {
