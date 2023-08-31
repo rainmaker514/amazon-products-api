@@ -132,7 +132,6 @@ async function getHTML(link){
     let htmlPages = [];
     let isButtonDisabled = false;
     let pageCounter = 1;
-    let currentPage = link;
 
     await page.setViewport({ width: 1200, height: 800 });
     await page.goto(link);
@@ -161,24 +160,17 @@ async function getHTML(link){
             continue;
         }
         
-        let nextPage = $('.a-last').children('a').attr('href');
-        
-        if(nextPage === undefined){
-            await page.goto(link);
-            continue;
-        }
-        
-        nextPage = baseUrl + nextPage;
+        let nextPage = baseUrl + $('.a-last').children('a').attr('href');
         
         pageCounter++;
         
-        //try {
+        try {
             await page.goto(nextPage);
-        //} catch (error) {
-          //  console.log('Reloading page');
-            //await page.goto(currentPage);
-            //pageCounter--;
-        //}
+        } catch (error) {
+            console.log('Reloading page');
+            await page.reload();
+            pageCounter--;
+        }
     }
 
     await browser.close();
