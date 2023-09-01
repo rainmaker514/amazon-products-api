@@ -6,6 +6,7 @@ require('dotenv').config();
 const fs = require('fs').promises;
 const PORT = process.env.PORT || 8000;
 const baseUrl = 'https://www.amazon.com';
+const throttledRequestMessage = 'There was an error, please try again.';
 const urls = [
     {
         name: 'all',
@@ -106,10 +107,14 @@ app.get('/:name', async (req, res) => {
     const url = req.urlObject;
     console.log('Getting pages');
     const htmlPages = await getHTML(url.link);
-    console.log('Getting products');
-    const results = getProducts(htmlPages);
-    console.log('Done!');
-    res.json(results);
+    if (htmlPages === throttledRequestMessage){
+        res.json(throttledRequestMessage);
+    }else{
+        console.log('Getting products');
+        const results = getProducts(htmlPages);
+        console.log('Done!');
+        res.json(results);
+    }
 });
 
 // Error handler
@@ -138,15 +143,16 @@ async function getHTML(link){
     
     while(!isButtonDisabled){
         console.log('Scrolling page ' + pageCounter);
-        
+        await new Promise(r => setTimeout(r, 2000));
         await autoScroll(page);
+        await new Promise(r => setTimeout(r, 2000));
         //grab raw html  
         const pageData = await page.evaluate(() => {
             return {
                 html: document.documentElement.innerHTML
             };
         });
-        await new Promise(r => setTimeout(r, 2000));
+        
         //putting pages in array for later
         htmlPages.push(pageData);
 
@@ -163,13 +169,12 @@ async function getHTML(link){
         let nextPage = baseUrl + $('.a-last').children('a').attr('href');
         
         pageCounter++;
-        
+        await new Promise(r => setTimeout(r, 2000));
         try {
             await page.goto(nextPage);
         } catch (error) {
-            console.log('Reloading page');
-            await page.reload();
-            pageCounter--;
+            console.log(throttledRequestMessage);
+            return throttledRequestMessage;
         }
     }
 
